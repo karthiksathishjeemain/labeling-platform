@@ -22,11 +22,9 @@ const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 const router = (0, express_1.Router)();
 const prismaClient = new client_1.PrismaClient();
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 // const s3 = new AWS.S3()
-// AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' })
-// Tried with and without this. Since s3 is not region-specific, I don't
-// think it should be necessary.
+// 
 // AWS.config.update({region: 'us-west-2'})
 const s3Client = new client_s3_1.S3Client({
     credentials: {
