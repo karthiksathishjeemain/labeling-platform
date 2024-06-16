@@ -13,7 +13,7 @@ const prismaClient = new PrismaClient();
 
 
 // const s3 = new AWS.S3()
-// AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' })
+
 
 // 
 // AWS.config.update({region: 'us-west-2'})
