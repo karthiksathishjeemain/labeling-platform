@@ -23,8 +23,8 @@ const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 const router = (0, express_1.Router)();
 const prismaClient = new client_1.PrismaClient();
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
-AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' });
+// const s3 = new AWS.S3()
+// AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' })
 // Tried with and without this. Since s3 is not region-specific, I don't
 // think it should be necessary.
 // AWS.config.update({region: 'us-west-2'})
@@ -47,7 +47,7 @@ router.get("/presignedUrl", middleware_1.authMiddleware, (req, res) => __awaiter
         Expires: 3600
     });
     res.json({
-        pre: url,
+        url,
         fields
     });
 }));

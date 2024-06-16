@@ -9,14 +9,13 @@ import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 
 const router = Router();
 const prismaClient = new PrismaClient();
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 
 
-const s3 = new AWS.S3()
-AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' })
+// const s3 = new AWS.S3()
+// AWS.config.update({ accessKeyId: 'AKIA47CR3CNHETSOWMMW', secretAccessKey: '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' })
 
-// Tried with and without this. Since s3 is not region-specific, I don't
-// think it should be necessary.
+// 
 // AWS.config.update({region: 'us-west-2'})
 
 const s3Client = new S3Client({
