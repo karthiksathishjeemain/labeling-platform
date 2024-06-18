@@ -8,33 +8,58 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
 const express_1 = require("express");
-const router = (0, express_1.Router)();
+const client_1 = require("@prisma/client");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const jwtsecretkey_1 = require("../jwtsecretkey");
+const middleware_1 = require("../middleware");
 const prismaClient = new client_1.PrismaClient();
-const JWT_SECRET = "karthik123";
+const router = (0, express_1.Router)();
 router.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // const hardaddress = '6D42eUQgfp2h4Jr369bYoZJZK5gYfz8roJaHmN3LnA3c'
-    // const existing_user = await prismaClient.user.findFirst({
-    //     where: {
-    //         address: hardaddress
-    //     }
-    // })
-    // if (existing_user) {
-    //     const token = jwt.sign({
-    //         id: existing_user.id
-    //     }, JWT_SECRET)
-    //     res.json({ token })
-    // }
-    // else {
-    //     const newuser = await prismaClient.worker.create({
-    //         data:{
-    //             address:hardaddress,
-    //             pending_amount: 0,
-    //             locked_amount: 0
-    //         }
-    //     })
-    // }
+    const hardcodededaddress = 'fbuerbfuerf';
+    const check_existing_user = yield prismaClient.worker.findFirst({
+        // address : String( hardcodededaddress)
+        where: {
+            address: hardcodededaddress
+        }
+    });
+    if (check_existing_user) {
+        const token = jsonwebtoken_1.default.sign({
+            id: check_existing_user
+        }, jwtsecretkey_1.Helper_JWT_Secret);
+        res.json(token);
+    }
+    else {
+        const helper = yield prismaClient.worker.create({
+            data: {
+                address: hardcodededaddress,
+                pending_amount: 0,
+                locked_amount: 0
+            }
+        });
+        const token = jsonwebtoken_1.default.sign({
+            id: helper.id
+        }, jwtsecretkey_1.Helper_JWT_Secret);
+        res.json({
+            token
+        });
+    }
+}));
+router.get('/nexttask', middleware_1.helperMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //@ts-ignore
+    const helper_id = req.helper_id;
+    const response = yield prismaClient.task.findMany({
+        where: {
+            done: false
+        },
+        include: {
+            options: true
+        }
+    });
+    res.json(response);
 }));
 exports.default = router;

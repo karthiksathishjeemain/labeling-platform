@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import {Response,Request}from "express";
-import { JWT_SECRET } from ".";
+import { JWT_SECRET, Helper_JWT_Secret } from "./jwtsecretkey";
 import jwt from 'jsonwebtoken';
 // const jwt = Jwt()
 // eimport jwt from "jsonwebtoken";
@@ -29,3 +29,22 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         })
     }
 }
+export const  helperMiddleware = async (req:Request,res:Response,next: NextFunction)=>{
+    // @ts-ignore
+const header = req.headers['authorization']??"";
+
+try{const check = jwt.verify(header,Helper_JWT_Secret)
+if (check){
+    //@ts-ignore
+    req.helper_id =check.id
+    return next()
+}
+else {
+    res.status(401).json({
+        message:"You are not logged in"
+    })
+}
+}
+catch(e){
+    res.json(e)
+}}
