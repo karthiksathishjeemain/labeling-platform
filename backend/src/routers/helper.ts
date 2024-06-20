@@ -4,28 +4,48 @@ import jwt from "jsonwebtoken";
 import { Helper_JWT_Secret } from "../jwtsecretkey";
 import { helperMiddleware } from "../middleware";
 import { createSubmissionInput } from "../types";
-import { SCIENTIFIC_NUMBER } from "../jwtsecretkey";
+// import { SCIENTIFIC_NUMBER } from "../jwtsecretkey";
+import nacl from "tweetnacl";
+import { PublicKey } from "@solana/web3.js";
 const prismaClient = new PrismaClient();
 const router = Router();
 const TOTAL_SUBMISSIONS=100
 router.post('/signin',async(req,res)=>{
-    const hardcodededaddress = 'fbuerbfuerf';
+    // const hardcodededaddress = 'fbuerbfuerf3';
+    const {signature, publicKey} = req.body;
+    const message = new TextEncoder().encode("Sign into mechanical turks as a worker");
+    console.log("signature is",signature);
+    console.log("Publickey  is",publicKey);
+
+    const result = nacl.sign.detached.verify(
+        message,
+        new Uint8Array(signature.data),
+        new PublicKey(publicKey).toBytes(),
+    );
+   console.log("result is",result)
+    if (!result) {
+        return res.status(411).json({
+            message: "Incorrect signature"
+        })
+    }
     const check_existing_user = await prismaClient.worker.findFirst({
         // address : String( hardcodededaddress)
         where:{
-            address:hardcodededaddress
+            address:publicKey
         }
     })
     if (check_existing_user){
         const token = jwt.sign({
             id:check_existing_user.id
         },Helper_JWT_Secret)
+        console.log("token is",token)
         res.json(token)
+
     }
     else {
         const helper = await prismaClient.worker.create({
             data:{
-               address : hardcodededaddress,
+               address : publicKey,
                pending_amount:0,
                locked_amount :0
             }
@@ -44,7 +64,7 @@ router.get('/nexttask',helperMiddleware,async(req,res)=>{
     //@ts-ignore
      const helper_id = req.helper_id;
     
-     const response = await prismaClient.task.findMany({
+     const response = await prismaClient.task.findFirst({
         where:{
             done:false,
             submissions:{
@@ -55,12 +75,16 @@ router.get('/nexttask',helperMiddleware,async(req,res)=>{
         },
         select:{
             id:true,
-            options : true,
+            amount : true,
             title : true,
-            amount : true
+            options : true,
+           
+           
         }
      })
-     res.json(response)
+     console.log("reached the endpoint")
+     console.log(response)
+     res.json({response})
 
      
     

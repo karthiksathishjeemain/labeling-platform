@@ -11,7 +11,9 @@ import { SCIENTIFIC_NUMBER } from '../jwtsecretkey';
 const router = Router();
 const prismaClient = new PrismaClient();
 // const AWS = require('aws-sdk');
-
+import { PublicKey } from "@solana/web3.js";
+import nacl from "tweetnacl";
+// import { decodeUTF8 } from "tweetnacl-util";
 
 // const s3 = new AWS.S3()
 
@@ -79,6 +81,11 @@ router.get("/tasksubmitted", authMiddleware, async (req, res) => {
         options:true
     }
    })
+   if (!taskDetails) {
+    return res.status(411).json({
+        message: "You dont have access to this task"
+    })
+}
    const result : Record<string, {
     count: number;
     option: {
@@ -89,11 +96,13 @@ const responses = await prismaClient.submission.findMany({
     where: {
         task_id: Number(task_id)
     },
+    
     include: {
         option: true
     }
 });
-   taskDetails?.options.forEach(option=>
+console.log("here")
+   taskDetails.options.forEach(option=>
     result[option.id]={
        count : 0,
        option :{
@@ -101,14 +110,19 @@ const responses = await prismaClient.submission.findMany({
        }
     }
    )
+//    console.log(result[])
+console.log(task_id)
+console.log("here2")
+console.log(responses)
 // res.json(result)
 responses.forEach(r => {
     result[r.option_id].count++;
 });
+console.log("here3")
 
 res.json({
     result,
-    taskDetails,
+    taskDetails
     
 })
 //    res.json submission
@@ -125,7 +139,7 @@ const s3Client = new S3Client({
 router.get("/presignedUrl", authMiddleware, async (req, res) => {
     // @ts-ignore
     const userId = req.userId;
-
+    console.log("entered presignedUrl")
     const { url, fields } = await createPresignedPost(s3Client, {
         Bucket: 'decentrelized-fiver',
         Key: `check1/${userId}/${Math.random()}/image.jpg`,
@@ -145,10 +159,27 @@ router.get("/presignedUrl", authMiddleware, async (req, res) => {
 
 })
 router.post('/signin', async (req, res) => {
-    const hardaddress = '6D42eUQgfp2h4Jr369bYoZJZK5gYfz8roJaHmN3LnA3c'
-    const existing_user = await prismaClient.user.findFirst({
+    // const hardaddress = '6D42eUQgfp2h4Jr369bYoZJZK5gYfz8roJaHmN3LnA3c'
+    
+    const { publicKey, signature } = req.body;
+    const message = new TextEncoder().encode("Sign into mechanical turks");
+
+    const result = nacl.sign.detached.verify(
+        message,
+        new Uint8Array(signature.data),
+        new PublicKey(publicKey).toBytes(),
+    );
+
+
+    if (!result) {
+        return res.status(411).json({
+            message: "Incorrect signature"
+        })
+    }
+
+  try{  const existing_user = await prismaClient.user.findFirst({
         where: {
-            address: hardaddress
+            address: publicKey
         }
     })
     if (existing_user) {
@@ -161,13 +192,16 @@ router.post('/signin', async (req, res) => {
     else {
         const user = await prismaClient.user.create({
             data: {
-                address: hardaddress
+                address: publicKey
             }
         })
         const token = jwt.sign({
             id: user.id
         }, JWT_SECRET)
         res.json({ token })
+    }}
+    catch(e){
+        res.json(e)
     }
     // res.json(existing_user)
 })
