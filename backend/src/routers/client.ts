@@ -13,11 +13,17 @@ const prismaClient = new PrismaClient();
 // const AWS = require('aws-sdk');
 import { PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
+import { Connection, Transaction } from "@solana/web3.js";
+import web3 from "@solana/web3.js"
 // import { decodeUTF8 } from "tweetnacl-util";
+let total_options=0;
 
 // const s3 = new AWS.S3()
 
-
+const RPC_URL="https://solana-devnet.g.alchemy.com/v2/3GJ4zQKCBd2vn1uo9LDAkxPzgmIpYSUE"
+const connection = new Connection(RPC_URL);
+// let connection = new web3.Connection(web3.clusterApiUrl("devnet"), "confirmed");
+const PARENT_WALLET_ADDRESS = "5JWCUecggSz4F7o5pUES5nEfBG8UGRzwWUtwsxvnB1dP";
 const DEFAULT_TITLE = "Select the most clickable thumbnail";
 // AWS.config.update({region: 'us-west-2'})
 router.post("/task", authMiddleware, async (req, res) => {
@@ -25,10 +31,39 @@ router.post("/task", authMiddleware, async (req, res) => {
     const userId = req.userId;
     const body = req.body;
     const parseData = createTaskInput.safeParse(body);
-
+   
     if (!parseData.success) {
         return res.status(411).json({
             message: "You've sent the wrong inputs"
+        })
+    }
+    console.log("Transaction sign is",parseData.data.signature)
+    const transaction = await connection.getTransaction(parseData.data.signature, {
+        maxSupportedTransactionVersion: 1
+    });
+
+    console.log(transaction);
+
+    if ((transaction?.meta?.postBalances[1] ?? 0) - (transaction?.meta?.preBalances[1] ?? 0) !== 100000000) {
+        return res.status(411).json({
+            message: "Transaction signature/amount incorrect"
+        })
+    }
+
+    if (transaction?.transaction.message.getAccountKeys().get(1)?.toString() !== PARENT_WALLET_ADDRESS) {
+        return res.status(411).json({
+            message: "Transaction sent to wrong address"
+        })
+    }
+     
+    const user = await prismaClient.user.findFirst({
+        where: {
+            id: userId
+        }
+    })
+    if (transaction?.transaction.message.getAccountKeys().get(0)?.toString() !== user?.address) {
+        return res.status(411).json({
+            message: "Transaction sent from wrong address"
         })
     }
     let response = await prismaClient.$transaction(async tx => {
@@ -108,7 +143,8 @@ console.log("here")
        option :{
         imageUrl : option.image_url
        }
-    }
+    },
+    total_options++
    )
 //    console.log(result[])
 console.log(task_id)
@@ -122,7 +158,8 @@ console.log("here3")
 
 res.json({
     result,
-    taskDetails
+    taskDetails,
+    total_options
     
 })
 //    res.json submission

@@ -28,30 +28,51 @@ export const Upload = () => {
                 "Authorization": localStorage.getItem("token")
             }
         })
-
+        // .then(response => {
+        //     // Handle the successful response here
+        //     console.log('Response data:', response.data);
+        //   })
+        // .catch(error => {
+        //     // Handle the error here
+        //     if (error.response) {
+        //       // The request was made and the server responded with a status code
+        //       // that falls out of the range of 2xx
+        //       console.log('Error response data:', error.response.data);
+        //       console.log('Error response status:', error.response.status);
+        //       console.log('Error response headers:', error.response.headers);
+        //     } else if (error.request) {
+        //       // The request was made but no response was received
+        //       console.log('Error request data:', error.request);
+        //     } else {
+        //       // Something happened in setting up the request that triggered an Error
+        //       console.log('Error message:', error.message);
+        //     }
+        //     console.log('Error config:', error.config);
+        //   });
+        
         router.push(`/task/${response.data.id}`)
     }
 
-    // async function makePayment() {
+    async function makePayment() {
 
-    //     const transaction = new Transaction().add(
-    //         SystemProgram.transfer({
-    //             fromPubkey: publicKey!,
-    //             toPubkey: new PublicKey("2KeovpYvrgpziaDsq8nbNMP4mc48VNBVXb5arbqrg9Cq"),
-    //             lamports: 100000000,
-    //         })
-    //     );
+        const transaction = new Transaction().add(
+            SystemProgram.transfer({
+                fromPubkey: publicKey!,
+                toPubkey: new PublicKey("5JWCUecggSz4F7o5pUES5nEfBG8UGRzwWUtwsxvnB1dP"),
+                lamports: 100000000,
+            })
+        );
 
-    //     const {
-    //         context: { slot: minContextSlot },
-    //         value: { blockhash, lastValidBlockHeight }
-    //     } = await connection.getLatestBlockhashAndContext();
+        const {
+            context: { slot: minContextSlot },
+            value: { blockhash, lastValidBlockHeight }
+        } = await connection.getLatestBlockhashAndContext();
 
-    //     const signature = await sendTransaction(transaction, connection, { minContextSlot });
+        const signature = await sendTransaction(transaction, connection, { minContextSlot });
 
-    //     await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
-    //     setTxSignature(signature);
-    // }
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+        setTxSignature(signature);
+    }
 
     return <div className="flex justify-center">
         <div className="max-w-screen-lg w-full">
@@ -80,12 +101,12 @@ export const Upload = () => {
         </div>
 
         <div className="flex justify-center">
-            {/* <button onClick={txSignature ? onSubmit : makePayment} type="button" className="mt-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
+            <button onClick={txSignature ? onSubmit : makePayment} type="button" className="mt-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
                 {txSignature ? "Submit Task" : "Pay 0.1 SOL"}
-            </button> */}
-            <button onClick={onSubmit} type="button" className="mt-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
-                {"Submit Task" }
             </button>
+           
+              
+            
         </div>
         
       </div>

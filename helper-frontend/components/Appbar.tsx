@@ -24,9 +24,9 @@ export const Appbar = () => {
             signature,
             publicKey: publicKey?.toString()
         });
-
+         console.log("Response is ",response)
         setBalance(response.data.amount)
-
+        console.log("Amount is",response.data.amount)
         localStorage.setItem("token", response.data.token);
     }
 
@@ -36,7 +36,7 @@ export const Appbar = () => {
 
     return <div className="flex justify-between border-b pb-2 pt-2">
         <div className="text-2xl pl-4 flex justify-center pt-2">
-            Turkify
+        LABELLL
         </div>
         <div className="text-xl pr-4 flex" >
             <button onClick={() => {
@@ -47,8 +47,16 @@ export const Appbar = () => {
                         "Authorization": localStorage.getItem("token")
                     }
                 })
-            }} className="m-2 mr-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Pay me out ({balance}) SOL</button>
-            {publicKey  ? <WalletDisconnectButton /> : <WalletMultiButton />}
+                .then(response => {
+                    // Alert the user on successful payout
+                    alert(`Hey, you have been paid ${(response.data.amount)/1000000} SOL. Thanks for helping!!!!` );
+                  })
+                  .catch(error => {
+                    // Handle error appropriately
+                    console.error("There was an error with the payout request:", error);
+                  });
+            }} className="m-2 mr-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Pay me my contribution</button>
+            {publicKey? <WalletDisconnectButton /> : <WalletMultiButton />}
             
         </div>
     </div>

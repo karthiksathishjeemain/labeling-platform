@@ -27,6 +27,7 @@ export const NextTask = () => {
                 "Authorization": localStorage.getItem("token")
             }
         })
+        
             .then(res => {
                 setCurrentTask(res.data.response);
                 console.log(res.data)
@@ -34,6 +35,7 @@ export const NextTask = () => {
             })
             .catch(e => {
                 setLoading(false)
+                console.log(e)
                 setCurrentTask(null)
             })
     }, [])
@@ -49,7 +51,7 @@ export const NextTask = () => {
     if (!currentTask) {
         return <div className="h-screen flex justify-center flex-col">
             <div className="w-full flex justify-center text-2xl">
-                Please check back in some time, there are no pending tasks at the momebt
+               Appreciate your effort to help. Please check back in some time, there are no pending tasks at the moment
             </div>
         </div>
     }
@@ -72,8 +74,20 @@ export const NextTask = () => {
                         headers: {
                             "Authorization": localStorage.getItem("token")
                         }
-                    });
-    
+                    })
+                    // .then(res=> {
+                    //     console.log('Successfully posted data:', res.data);
+                    //   })
+                    //   .catch(error => {
+                    //     if (error.response) {
+                    //       console.log('Server responded with error:', error.response.data);
+                    //     } else if (error.request) {
+                    //       console.log('No response received:', error.request);
+                    //     } else {
+                    //       console.log('Error setting up request:', error.message);
+                    //     }
+                    //   });
+                    
                     const nextTask = response.data.nexttask;
                     if (nextTask) {
                         setCurrentTask(nextTask)
